@@ -1,0 +1,125 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
+@import "tailwindcss";
+
+/* ─── Custom Theme ────────────────────────────────────────────────────────── */
+@theme {
+  --color-violet-glow: rgba(139, 92, 246, 0.15);
+  --color-fuchsia-glow: rgba(217, 70, 239, 0.1);
+}
+
+/* ─── Base Styles ─────────────────────────────────────────────────────────── */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  background-color: #030712;
+  color: #e5e7eb;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #030712;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1f2937;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #374151;
+}
+
+/* ─── Custom Utility Classes ──────────────────────────────────────────────── */
+
+/* Gradient text helper */
+.text-gradient {
+  background: linear-gradient(135deg, #a78bfa, #c084fc, #e879f9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glow effects */
+.glow-violet {
+  box-shadow: 0 0 40px var(--color-violet-glow),
+    0 0 80px var(--color-violet-glow);
+}
+
+.glow-fuchsia {
+  box-shadow: 0 0 40px var(--color-fuchsia-glow),
+    0 0 80px var(--color-fuchsia-glow);
+}
+
+/* Animated gradient background */
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite;
+}
+
+/* Floating animation */
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Pulse glow */
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* ─── Keyframes ───────────────────────────────────────────────────────────── */
+@keyframes gradient-shift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* ─── Custom form styling for dark inputs ─────────────────────────────────── */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
+
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 20px;
+}
