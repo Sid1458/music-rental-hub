@@ -14,6 +14,7 @@ const navLinks = [
   { href: "/", label: "Home" },
   { href: "/instruments", label: "Instruments" },
   { href: "/booking", label: "Book Now" },
+  { href: "/dashboard", label: "Dashboard" },
   { href: "/login", label: "Login" },
 ];
 

@@ -7,15 +7,31 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useAppStore } from "@/lib/store";
-import { instruments, getInstrumentById } from "@/lib/data";
+import { getInstrumentById } from "@/lib/data";
+import { fetchAllInstruments } from "@/lib/api";
+import { Instrument } from "@/lib/data";
 
 export default function BookingForm() {
   const { bookingForm, setBookingForm, resetBookingForm, addBooking } =
     useAppStore();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [instruments, setInstruments] = useState<Instrument[]>([]);
+  const [loadingInstruments, setLoadingInstruments] = useState(true);
+
+  // Load instruments for the dropdown
+  useEffect(() => {
+    async function load() {
+      setLoadingInstruments(true);
+      const all = await fetchAllInstruments();
+      setInstruments(all);
+      setLoadingInstruments(false);
+    }
+    load();
+  }, []);
 
   // Calculate total price based on selected instrument and duration
   const selectedInstrument = bookingForm.instrumentId
@@ -56,39 +72,101 @@ export default function BookingForm() {
     setIsSubmitted(false);
   };
 
-  // ─── Success State ───────────────────────────────────────────────────────
+  // ─── Success / Confirmation State ─────────────────────────────────────────
 
   if (isSubmitted) {
     return (
-      <div className="max-w-lg mx-auto text-center py-16 px-6">
-        <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
-          <svg
-            className="w-10 h-10 text-emerald-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M5 13l4 4L19 7"
-            />
-          </svg>
+      <div className="max-w-lg mx-auto py-10 px-6 animate-fade-in-up">
+        {/* Success icon */}
+        <div className="text-center mb-8">
+          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
+            <svg
+              className="w-10 h-10 text-emerald-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+          </div>
+          <h2 className="text-3xl font-bold text-white mb-2">
+            Booking Confirmed!
+          </h2>
+          <p className="text-gray-400">
+            Your rental has been successfully booked.
+          </p>
         </div>
-        <h2 className="text-3xl font-bold text-white mb-3">Booking Confirmed!</h2>
-        <p className="text-gray-400 mb-2">
-          Your rental for <span className="text-violet-400 font-semibold">{bookingForm.instrumentName}</span> has been booked.
-        </p>
-        <p className="text-gray-500 text-sm mb-8">
-          We&apos;ll send confirmation details to your email.
-        </p>
-        <button
-          onClick={handleReset}
-          className="px-8 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-semibold hover:from-violet-500 hover:to-fuchsia-500 transition-all duration-200 shadow-lg shadow-violet-500/25 cursor-pointer"
-        >
-          Book Another Instrument
-        </button>
+
+        {/* Booking Summary Card */}
+        <div className="bg-gray-900/60 border border-white/10 rounded-2xl p-6 space-y-4 mb-8">
+          <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
+            Booking Summary
+          </h3>
+
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-gray-400 text-sm">Instrument</span>
+              <span className="text-white font-semibold">
+                {bookingForm.instrumentName}
+              </span>
+            </div>
+            <div className="w-full h-px bg-white/5" />
+            <div className="flex justify-between items-center">
+              <span className="text-gray-400 text-sm">Duration</span>
+              <span className="text-white font-medium">
+                {bookingForm.duration === "day" ? "1 Day" : "1 Week"}
+              </span>
+            </div>
+            <div className="w-full h-px bg-white/5" />
+            <div className="flex justify-between items-center">
+              <span className="text-gray-400 text-sm">Start Date</span>
+              <span className="text-white font-medium">
+                {bookingForm.startDate}
+              </span>
+            </div>
+            <div className="w-full h-px bg-white/5" />
+            <div className="flex justify-between items-center">
+              <span className="text-gray-400 text-sm">Customer</span>
+              <span className="text-white font-medium">
+                {bookingForm.customerName}
+              </span>
+            </div>
+            <div className="w-full h-px bg-white/5" />
+            <div className="flex justify-between items-center">
+              <span className="text-gray-400 text-sm">Email</span>
+              <span className="text-white font-medium">
+                {bookingForm.email}
+              </span>
+            </div>
+          </div>
+
+          {/* Total */}
+          <div className="bg-violet-500/10 border border-violet-500/20 rounded-xl p-4 flex items-center justify-between mt-4">
+            <span className="text-gray-300 font-medium">Total Price</span>
+            <span className="text-3xl font-bold text-white">${totalPrice}</span>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <button
+            onClick={handleReset}
+            className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-semibold hover:from-violet-500 hover:to-fuchsia-500 transition-all duration-200 shadow-lg shadow-violet-500/25 cursor-pointer"
+          >
+            Book Another Instrument
+          </button>
+          <Link
+            href="/dashboard"
+            className="flex-1 px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-gray-300 font-semibold text-center hover:bg-white/10 hover:text-white transition-all duration-200"
+          >
+            Go to Dashboard
+          </Link>
+        </div>
       </div>
     );
   }
@@ -98,7 +176,7 @@ export default function BookingForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="max-w-2xl mx-auto bg-gray-900/60 backdrop-blur-sm border border-white/10 rounded-2xl p-6 sm:p-8 space-y-6"
+      className="max-w-2xl mx-auto bg-gray-900/60 backdrop-blur-sm border border-white/10 rounded-2xl p-6 sm:p-8 space-y-6 animate-fade-in-up"
     >
       <div className="text-center mb-2">
         <h2 className="text-2xl font-bold text-white">Book Your Instrument</h2>
@@ -109,7 +187,10 @@ export default function BookingForm() {
 
       {/* Customer Name */}
       <div>
-        <label htmlFor="customerName" className="block text-sm font-medium text-gray-300 mb-2">
+        <label
+          htmlFor="customerName"
+          className="block text-sm font-medium text-gray-300 mb-2"
+        >
           Full Name
         </label>
         <input
@@ -125,7 +206,10 @@ export default function BookingForm() {
 
       {/* Email */}
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+        <label
+          htmlFor="email"
+          className="block text-sm font-medium text-gray-300 mb-2"
+        >
           Email Address
         </label>
         <input
@@ -141,7 +225,10 @@ export default function BookingForm() {
 
       {/* Phone */}
       <div>
-        <label htmlFor="phone" className="block text-sm font-medium text-gray-300 mb-2">
+        <label
+          htmlFor="phone"
+          className="block text-sm font-medium text-gray-300 mb-2"
+        >
           Phone Number
         </label>
         <input
@@ -157,7 +244,10 @@ export default function BookingForm() {
 
       {/* Instrument Selector */}
       <div>
-        <label htmlFor="instrument" className="block text-sm font-medium text-gray-300 mb-2">
+        <label
+          htmlFor="instrument"
+          className="block text-sm font-medium text-gray-300 mb-2"
+        >
           Select Instrument
         </label>
         <select
@@ -171,10 +261,11 @@ export default function BookingForm() {
               instrumentName: inst?.name || "",
             });
           }}
-          className="w-full px-4 py-3 rounded-xl bg-gray-800/80 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all appearance-none cursor-pointer"
+          disabled={loadingInstruments}
+          className="w-full px-4 py-3 rounded-xl bg-gray-800/80 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all appearance-none cursor-pointer disabled:opacity-50"
         >
           <option value="" className="bg-gray-900">
-            Choose an instrument...
+            {loadingInstruments ? "Loading..." : "Choose an instrument..."}
           </option>
           {instruments.map((inst) => (
             <option key={inst.id} value={inst.id} className="bg-gray-900">
@@ -188,7 +279,10 @@ export default function BookingForm() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Duration */}
         <div>
-          <label htmlFor="duration" className="block text-sm font-medium text-gray-300 mb-2">
+          <label
+            htmlFor="duration"
+            className="block text-sm font-medium text-gray-300 mb-2"
+          >
             Rental Duration
           </label>
           <select
@@ -210,7 +304,10 @@ export default function BookingForm() {
 
         {/* Start Date */}
         <div>
-          <label htmlFor="startDate" className="block text-sm font-medium text-gray-300 mb-2">
+          <label
+            htmlFor="startDate"
+            className="block text-sm font-medium text-gray-300 mb-2"
+          >
             Start Date
           </label>
           <input
@@ -230,12 +327,11 @@ export default function BookingForm() {
           <div>
             <p className="text-sm text-gray-400">Estimated Total</p>
             <p className="text-sm text-gray-500 mt-0.5">
-              {selectedInstrument.name} · {bookingForm.duration === "day" ? "1 Day" : "1 Week"}
+              {selectedInstrument.name} ·{" "}
+              {bookingForm.duration === "day" ? "1 Day" : "1 Week"}
             </p>
           </div>
-          <p className="text-3xl font-bold text-white">
-            ${totalPrice}
-          </p>
+          <p className="text-3xl font-bold text-white">${totalPrice}</p>
         </div>
       )}
 
@@ -247,9 +343,24 @@ export default function BookingForm() {
       >
         {isSubmitting ? (
           <span className="flex items-center justify-center gap-2">
-            <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            <svg
+              className="animate-spin w-5 h-5"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
             </svg>
             Processing...
           </span>
