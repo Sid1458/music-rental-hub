@@ -1,0 +1,20 @@
+{
+  "name": "music-rental-hub-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Music Rental Hub — rent musical instruments easily",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
+  "keywords": ["music", "rental", "instruments", "api"],
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "better-sqlite3": "^11.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}
