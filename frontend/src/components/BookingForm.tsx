@@ -11,7 +11,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAppStore } from "@/lib/store";
 import { getInstrumentById } from "@/lib/data";
-import { fetchAllInstruments } from "@/lib/api";
+import { fetchAllInstruments, submitBooking } from "@/lib/api";
 import { Instrument } from "@/lib/data";
 
 export default function BookingForm() {
@@ -43,27 +43,42 @@ export default function BookingForm() {
       : selectedInstrument.pricePerWeek
     : 0;
 
-  /** Handle form submission (mock — replace with API call later) */
+  /** Handle form submission — sends booking to the backend API */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1200));
+    try {
+      // POST booking to the backend
+      await submitBooking({
+        customerName: bookingForm.customerName,
+        email: bookingForm.email,
+        phone: bookingForm.phone,
+        instrumentId: bookingForm.instrumentId,
+        instrumentName: bookingForm.instrumentName,
+        duration: bookingForm.duration,
+        startDate: bookingForm.startDate,
+        totalPrice,
+      });
 
-    addBooking({
-      customerName: bookingForm.customerName,
-      email: bookingForm.email,
-      phone: bookingForm.phone,
-      instrumentId: bookingForm.instrumentId,
-      instrumentName: bookingForm.instrumentName,
-      duration: bookingForm.duration,
-      startDate: bookingForm.startDate,
-      totalPrice,
-    });
+      // Also save to local store for the dashboard
+      addBooking({
+        customerName: bookingForm.customerName,
+        email: bookingForm.email,
+        phone: bookingForm.phone,
+        instrumentId: bookingForm.instrumentId,
+        instrumentName: bookingForm.instrumentName,
+        duration: bookingForm.duration,
+        startDate: bookingForm.startDate,
+        totalPrice,
+      });
 
-    setIsSubmitting(false);
-    setIsSubmitted(true);
+      setIsSubmitted(true);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Booking failed. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   /** Reset form for new booking */
