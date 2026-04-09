@@ -2,6 +2,11 @@
  * Home Page — Landing page with hero section, featured instruments, and stats.
  */
 
+// Prevent Next.js from statically rendering this page at build time.
+// Without this, `next build` would try to call the backend API (which doesn't
+// exist in CI), causing the build to fail.
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import { fetchFeaturedInstruments } from "@/lib/api";
 import InstrumentCard from "@/components/InstrumentCard";

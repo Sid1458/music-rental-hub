@@ -2,6 +2,9 @@
  * Dashboard Page — view all past bookings from backend.
  */
 
+// Prevent Next.js from statically rendering this page at build time.
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import { fetchAllBookings, fetchAllInstruments } from "@/lib/api";
 import PageHeader from "@/components/PageHeader";
