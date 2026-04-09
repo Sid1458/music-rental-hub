@@ -1,16 +1,14 @@
 /**
- * Dashboard Page — view all past bookings from Zustand store.
+ * Dashboard Page — view all past bookings from backend.
  */
 
-"use client";
-
 import Link from "next/link";
-import { useAppStore } from "@/lib/store";
-import { getInstrumentById } from "@/lib/data";
+import { fetchAllBookings, fetchAllInstruments } from "@/lib/api";
 import PageHeader from "@/components/PageHeader";
 
-export default function DashboardPage() {
-  const bookings = useAppStore((s) => s.bookings);
+export default async function DashboardPage() {
+  const bookings = await fetchAllBookings().catch(() => []);
+  const instruments = await fetchAllInstruments().catch(() => []);
 
   // Stats
   const totalBookings = bookings.length;
@@ -85,7 +83,7 @@ export default function DashboardPage() {
           ) : (
             <div className="space-y-4 animate-fade-in-up">
               {bookings.map((booking, idx) => {
-                const inst = getInstrumentById(booking.instrumentId);
+                const inst = instruments.find((i) => i.id === booking.instrumentId);
                 return (
                   <div
                     key={booking.id || idx}

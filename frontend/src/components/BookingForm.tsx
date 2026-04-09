@@ -10,7 +10,6 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAppStore } from "@/lib/store";
-import { getInstrumentById } from "@/lib/data";
 import { fetchAllInstruments, submitBooking } from "@/lib/api";
 import { Instrument } from "@/lib/data";
 
@@ -35,7 +34,7 @@ export default function BookingForm() {
 
   // Calculate total price based on selected instrument and duration
   const selectedInstrument = bookingForm.instrumentId
-    ? getInstrumentById(bookingForm.instrumentId)
+    ? instruments.find((i) => i.id === bookingForm.instrumentId)
     : null;
   const totalPrice = selectedInstrument
     ? bookingForm.duration === "day"

@@ -8,7 +8,7 @@
 import { useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAppStore } from "@/lib/store";
-import { getInstrumentById } from "@/lib/data";
+import { fetchInstrumentById } from "@/lib/api";
 import BookingForm from "@/components/BookingForm";
 import PageHeader from "@/components/PageHeader";
 
@@ -21,13 +21,14 @@ function BookingContent() {
   useEffect(() => {
     const instrumentId = searchParams.get("instrument");
     if (instrumentId) {
-      const inst = getInstrumentById(instrumentId);
-      if (inst) {
-        setBookingForm({
-          instrumentId: inst.id,
-          instrumentName: inst.name,
-        });
-      }
+      fetchInstrumentById(instrumentId).then((inst) => {
+        if (inst) {
+          setBookingForm({
+            instrumentId: inst.id,
+            instrumentName: inst.name,
+          });
+        }
+      });
     }
   }, [searchParams, setBookingForm]);
 
