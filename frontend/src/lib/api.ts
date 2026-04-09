@@ -9,6 +9,38 @@ import { Instrument, Booking } from "./data";
 
 const API_BASE = "http://localhost:5000/api";
 
+// ─── Image Mapping ────────────────────────────────────────────────────────────
+
+/**
+ * Maps an instrument's name and category to one of the available
+ * images in /public/instruments/.
+ */
+function getInstrumentImage(name: string, category: string): string {
+  const n = name.toLowerCase();
+  const c = category.toLowerCase();
+
+  if (n.includes("acoustic")) return "/instruments/acoustic-guitar.png";
+  if (n.includes("electric guitar") || n.includes("stratocaster") || n.includes("les paul") || n.includes("telecaster"))
+    return "/instruments/electric-guitar.png";
+  if (n.includes("bass")) return "/instruments/electric-guitar.png";
+  if (n.includes("violin") || n.includes("viola") || n.includes("cello"))
+    return "/instruments/violin.png";
+  if (n.includes("drum") || n.includes("percussion") || n.includes("snare") || n.includes("cymbal"))
+    return "/instruments/drum-kit.png";
+  if (n.includes("keyboard") || n.includes("piano") || n.includes("synth") || n.includes("organ"))
+    return "/instruments/keyboard.png";
+  if (n.includes("sax") || n.includes("trumpet") || n.includes("trombone") || n.includes("flute") || n.includes("clarinet") || n.includes("oboe"))
+    return "/instruments/saxophone.png";
+
+  // Fallback by category
+  if (c.includes("string")) return "/instruments/acoustic-guitar.png";
+  if (c.includes("percussion") || c.includes("drum")) return "/instruments/drum-kit.png";
+  if (c.includes("key") || c.includes("piano")) return "/instruments/keyboard.png";
+  if (c.includes("wind") || c.includes("brass") || c.includes("woodwind")) return "/instruments/saxophone.png";
+
+  return "/instruments/acoustic-guitar.png";
+}
+
 // ─── Instruments ──────────────────────────────────────────────────────────────
 
 /** Fetch all instruments from the backend */
@@ -21,13 +53,13 @@ export async function fetchAllInstruments(): Promise<Instrument[]> {
   // Map backend fields to frontend Instrument interface
   return data.map((item: Record<string, unknown>) => ({
     id: String(item.id),
-    name: item.name,
-    category: item.category ?? "Other",
+    name: item.name as string,
+    category: (item.category as string) ?? "Other",
     brand: "",
-    description: item.description ?? "",
-    image: "/instruments/acoustic-guitar.png",
-    pricePerDay: item.price ?? 0,
-    pricePerWeek: (item.price as number ?? 0) * 5,
+    description: (item.description as string) ?? "",
+    image: getInstrumentImage((item.name as string) ?? "", (item.category as string) ?? ""),
+    pricePerDay: (item.price as number) ?? 0,
+    pricePerWeek: ((item.price as number) ?? 0) * 5,
     rating: 4.5,
     available: true,
     featured: false,
@@ -51,13 +83,13 @@ export async function fetchInstrumentById(
 
   return {
     id: String(item.id),
-    name: item.name,
-    category: item.category ?? "Other",
+    name: item.name as string,
+    category: (item.category as string) ?? "Other",
     brand: "",
-    description: item.description ?? "",
-    image: "/instruments/acoustic-guitar.png",
-    pricePerDay: item.price ?? 0,
-    pricePerWeek: (item.price ?? 0) * 5,
+    description: (item.description as string) ?? "",
+    image: getInstrumentImage((item.name as string) ?? "", (item.category as string) ?? ""),
+    pricePerDay: (item.price as number) ?? 0,
+    pricePerWeek: ((item.price as number) ?? 0) * 5,
     rating: 4.5,
     available: true,
     featured: false,

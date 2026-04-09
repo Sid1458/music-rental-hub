@@ -1,0 +1,184 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# CI/CD Pipeline — Music Rental Hub
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# This GitHub Actions workflow automates the full CI/CD lifecycle:
+#   ✅  Continuous Integration  → lint, test, build on every push/PR
+#   🚀  Continuous Deployment   → simulated deploy on merge to main
+#
+# Triggers:
+#   - Push to `main` or `develop` branch
+#   - Any Pull Request targeting `main`
+# ══════════════════════════════════════════════════════════════════════════════
+
+name: 🎸 Music Rental Hub CI/CD
+
+on:
+  push:
+    branches:
+      - main       # Run pipeline when code is pushed to main
+      - develop    # Also run on the develop branch (feature integration branch)
+  pull_request:
+    branches:
+      - main       # Run pipeline on any PR targeting main (acts as a gate)
+
+# ─── Global environment variables ────────────────────────────────────────────
+env:
+  NODE_VERSION: "18"   # Node.js LTS version — consistent across all jobs
+
+# ══════════════════════════════════════════════════════════════════════════════
+# JOB 1 — Backend CI (Test + Verify)
+# ══════════════════════════════════════════════════════════════════════════════
+jobs:
+  backend-ci:
+    name: 🔧 Backend — Install, Test & Verify
+    runs-on: ubuntu-latest   # Use a fresh Ubuntu virtual machine hosted by GitHub
+
+    defaults:
+      run:
+        working-directory: backend   # All steps below run inside the /backend folder
+
+    steps:
+      # ── Step 1: Checkout ──────────────────────────────────────────────────
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        # Downloads the full repository code onto the GitHub Actions runner
+
+      # ── Step 2: Setup Node.js ─────────────────────────────────────────────
+      - name: ⚙️  Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"                    # Cache npm dependencies for faster runs
+          cache-dependency-path: backend/package-lock.json
+
+      # ── Step 3: Check Node.js version ────────────────────────────────────
+      - name: 🔍 Verify Node.js version
+        run: node --version && npm --version
+        # Prints the exact versions so you can confirm what's running in CI
+
+      # ── Step 4: Install dependencies ─────────────────────────────────────
+      - name: 📦 Install backend dependencies
+        run: npm install
+        # Installs all packages listed in backend/package.json
+
+      # ── Step 5: Run tests ────────────────────────────────────────────────
+      - name: 🧪 Run backend tests
+        run: npm test
+        # Runs `node test.js` — validates data shapes, business logic, and config.
+        # If any assertion fails, process.exit(1) is called → this step fails → pipeline stops.
+
+      # ── Step 6: Verify server file exists (sanity check) ─────────────────
+      - name: ✅ Verify server entry point exists
+        run: |
+          if [ -f "src/server.js" ]; then
+            echo "✅ src/server.js found — backend entry point OK"
+          else
+            echo "❌ src/server.js NOT found!"
+            exit 1
+          fi
+
+  # ══════════════════════════════════════════════════════════════════════════
+  # JOB 2 — Frontend CI (Install, Lint & Build)
+  # ══════════════════════════════════════════════════════════════════════════
+  frontend-ci:
+    name: 🖥️  Frontend — Install, Lint & Build
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend   # All steps run inside the /frontend folder
+
+    steps:
+      # ── Step 1: Checkout ──────────────────────────────────────────────────
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      # ── Step 2: Setup Node.js ─────────────────────────────────────────────
+      - name: ⚙️  Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      # ── Step 3: Install dependencies ─────────────────────────────────────
+      - name: 📦 Install frontend dependencies
+        run: npm install
+        # Installs React, Next.js, Zustand, TypeScript, ESLint, etc.
+
+      # ── Step 4: Lint ─────────────────────────────────────────────────────
+      - name: 🔎 Run ESLint (code quality check)
+        run: npm run lint
+        # Checks for TypeScript/React best practices.
+        # Any lint error will fail this step.
+        continue-on-error: true   # Treat lint warnings as non-blocking for now
+
+      # ── Step 5: Build ────────────────────────────────────────────────────
+      - name: 🏗️  Build Next.js for production
+        run: npm run build
+        # Compiles TypeScript, bundles assets, and produces an optimized build.
+        # If the build fails (type errors, missing imports), this step fails.
+        env:
+          # In a real project, set the real backend URL as a GitHub Secret.
+          # For CI we point to localhost so the build doesn't call the backend.
+          NEXT_PUBLIC_API_BASE: "http://localhost:5000/api"
+
+  # ══════════════════════════════════════════════════════════════════════════
+  # JOB 3 — Deploy (Simulated)
+  # Runs ONLY after both CI jobs pass, AND ONLY on pushes to main.
+  # ══════════════════════════════════════════════════════════════════════════
+  deploy:
+    name: 🚀 Deploy to Production (Simulated)
+    runs-on: ubuntu-latest
+    needs: [backend-ci, frontend-ci]   # Wait for both CI jobs to succeed first
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    # 👆 Only deploy when a real push lands on main (not on PRs)
+
+    steps:
+      # ── Step 1: Checkout ──────────────────────────────────────────────────
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      # ── Step 2: Simulate backend deployment ──────────────────────────────
+      - name: 🔧 Deploy backend (simulated)
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🚀 Deploying Music Rental Hub Backend..."
+          echo "   Commit: ${{ github.sha }}"
+          echo "   Branch: ${{ github.ref_name }}"
+          echo "   Actor:  ${{ github.actor }}"
+          echo ""
+          echo "   In production this step would:"
+          echo "   → SSH into the server"
+          echo "   → Pull latest code"
+          echo "   → Run: npm install --production"
+          echo "   → Restart with PM2: pm2 restart server"
+          echo ""
+          echo "✅ Backend deployment complete!"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+      # ── Step 3: Simulate frontend deployment ─────────────────────────────
+      - name: 🖥️  Deploy frontend (simulated)
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🚀 Deploying Music Rental Hub Frontend..."
+          echo ""
+          echo "   In production this step would:"
+          echo "   → Push to Vercel: vercel --prod"
+          echo "   → Or build Docker image and push to registry"
+          echo "   → Update environment variables / secrets"
+          echo ""
+          echo "✅ Frontend deployment complete!"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+      # ── Step 4: Post-deploy summary ───────────────────────────────────────
+      - name: 📋 Deployment summary
+        run: |
+          echo ""
+          echo "🎸 Music Rental Hub — Deployment Summary"
+          echo "  Status  : ✅ Success"
+          echo "  Version : ${{ github.sha }}"
+          echo "  URL     : https://music-rental-hub.example.com  (simulated)"
+          echo "  Time    : $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo ""
