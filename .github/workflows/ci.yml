@@ -24,7 +24,7 @@ on:
 
 # ─── Global environment variables ────────────────────────────────────────────
 env:
-  NODE_VERSION: "18"   # Node.js LTS version — consistent across all jobs
+  NODE_VERSION: "20"   # Node.js LTS version — Next.js 16 requires >=20.9.0
 
 # ══════════════════════════════════════════════════════════════════════════════
 # JOB 1 — Backend CI (Test + Verify)

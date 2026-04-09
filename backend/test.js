@@ -25,7 +25,7 @@ console.log("\n🎸 Music Rental Hub — Backend Tests\n");
 // 1. Sanity check: Node.js version
 console.log("▶  [1] Environment checks");
 const [major] = process.versions.node.split(".").map(Number);
-assert(`Node.js version is 18 or higher (found v${process.versions.node})`, major >= 18);
+assert(`Node.js version is 20 or higher (found v${process.versions.node})`, major >= 20);
 
 // 2. Instrument data shape validation
 console.log("\n▶  [2] Instrument data validation");
