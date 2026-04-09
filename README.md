@@ -133,6 +133,7 @@ npm start
 - [ ] Database Integration (PostgreSQL / MongoDB)
 - [ ] Authentication (NextAuth.js)
 - [ ] Payment Gateway (Stripe / Razorpay)
+
 - [ ] Admin Dashboard
 - [ ] Email Notifications
 - [ ] Deployment (Vercel / AWS)

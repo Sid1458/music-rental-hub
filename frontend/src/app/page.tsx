@@ -3,7 +3,7 @@
  */
 
 import Link from "next/link";
-import { getFeaturedInstruments } from "@/lib/data";
+import { fetchFeaturedInstruments } from "@/lib/api";
 import InstrumentCard from "@/components/InstrumentCard";
 
 // Stats shown in the hero section
@@ -44,8 +44,8 @@ const steps = [
   },
 ];
 
-export default function HomePage() {
-  const featured = getFeaturedInstruments();
+export default async function HomePage() {
+  const featured = await fetchFeaturedInstruments();
 
   return (
     <>

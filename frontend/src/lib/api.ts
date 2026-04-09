@@ -34,6 +34,12 @@ export async function fetchAllInstruments(): Promise<Instrument[]> {
   }));
 }
 
+/** Fetch only featured instruments (mocking featured flag for now by returning first 4) */
+export async function fetchFeaturedInstruments(): Promise<Instrument[]> {
+  const instruments = await fetchAllInstruments();
+  return instruments.slice(0, 4);
+}
+
 /** Fetch a single instrument by ID */
 export async function fetchInstrumentById(
   id: string
